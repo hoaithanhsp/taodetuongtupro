@@ -23,7 +23,6 @@ import FileUpload from './components/FileUpload';
 import MarkdownResult from './components/MarkdownResult';
 import BbtQuickGenerator from './components/BbtQuickGenerator';
 import ApiKeyModal from './components/ApiKeyModal';
-import VisitCounter from './components/VisitCounter';
 import {
   Sparkles,
   BookOpen,
@@ -256,11 +255,8 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Toolbar: VisitCounter, DarkMode, API Settings */}
+          {/* Right Toolbar: DarkMode, API Settings */}
           <div className="flex flex-wrap items-center gap-2.5">
-            <div className="hidden xl:block">
-              <VisitCounter />
-            </div>
 
             <button
               type="button"
@@ -803,9 +799,6 @@ const App: React.FC = () => {
               Tác giả: <strong className="text-indigo-600 dark:text-indigo-400">Phan Lâm</strong>,{' '}
               <strong className="text-teal-600 dark:text-teal-400">Trường THPT Trần Kỳ Phong</strong>
             </span>
-          </div>
-          <div className="xl:hidden">
-            <VisitCounter />
           </div>
         </div>
       </footer>
