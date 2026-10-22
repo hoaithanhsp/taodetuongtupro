@@ -53,7 +53,7 @@ const FigureImageCard: React.FC<{ svg: string; figureType?: string }> = ({ svg, 
   const filePrefix = figureType || 'hinh-minh-hoa';
 
   return (
-    <div className="my-4 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm flex flex-col items-center">
+    <div className="my-4 p-4 bg-white dark:bg-slate-900 border border-teal-200/80 dark:border-slate-700 rounded-xl shadow-sm flex flex-col items-center">
       <div className="overflow-x-auto max-w-full flex justify-center bg-white p-2 rounded-lg">
         <img
           src={imgSrc}
@@ -69,14 +69,14 @@ const FigureImageCard: React.FC<{ svg: string; figureType?: string }> = ({ svg, 
         <button
           type="button"
           onClick={handleCopy}
-          className="text-xs font-medium px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer"
+          className="text-xs font-medium px-2.5 py-1 rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 border border-teal-200 transition-colors cursor-pointer"
         >
           {copied ? '✓ Đã copy ảnh!' : '📋 Copy ảnh'}
         </button>
         <button
           type="button"
           onClick={() => downloadSvgAsPng(svg, `${filePrefix}-300dpi.png`)}
-          className="text-xs font-medium px-2.5 py-1 rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 border border-teal-200 transition-colors cursor-pointer"
+          className="text-xs font-medium px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
         >
           ⬇ Tải PNG (300 DPI)
         </button>
@@ -123,7 +123,7 @@ const MarkdownResult: React.FC<MarkdownResultProps> = ({ content, className }) =
   }, [content]);
 
   return (
-    <div className={`markdown-body prose prose-indigo max-w-none dark:prose-invert ${className || ''}`}>
+    <div className={`markdown-body prose prose-teal max-w-none dark:prose-invert ${className || ''}`}>
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
@@ -163,7 +163,7 @@ const MarkdownResult: React.FC<MarkdownResultProps> = ({ content, className }) =
                     <button
                       type="button"
                       onClick={() => navigator.clipboard.writeText(String(children))}
-                      className="text-xs text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                      className="text-xs text-teal-400 hover:text-teal-300 transition-colors cursor-pointer"
                     >
                       Sao chép mã
                     </button>
@@ -177,7 +177,7 @@ const MarkdownResult: React.FC<MarkdownResultProps> = ({ content, className }) =
 
             return (
               <code
-                className={`${codeClassName || ''} bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono text-indigo-700 dark:text-indigo-300`}
+                className={`${codeClassName || ''} bg-teal-50 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono text-teal-800 dark:text-teal-300`}
                 {...props}
               >
                 {children}

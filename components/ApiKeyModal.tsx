@@ -80,16 +80,16 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, canC
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-teal-200 dark:border-slate-800">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-teal-600 p-5 text-white flex items-center justify-between">
+        <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-600 p-5 text-white flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="p-2.5 bg-white/20 rounded-xl backdrop-blur-md">
               <Key className="w-6 h-6 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-bold">Cấu hình Nguồn API & Model AI</h3>
-              <p className="text-indigo-100 text-xs">
+              <p className="text-teal-100 text-xs">
                 Hỗ trợ Google Gemini API (3.8 Flash) & Agent Platform API
               </p>
             </div>
@@ -121,7 +121,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, canC
                 }}
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   provider === 'gemini'
-                    ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 ring-2 ring-indigo-500/20'
+                    ? 'border-teal-600 bg-teal-50/80 dark:bg-teal-950/50 ring-2 ring-teal-500/20'
                     : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
@@ -130,7 +130,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, canC
                     Google Gemini API
                   </span>
                   {provider === 'gemini' && (
-                    <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
+                    <span className="w-2 h-2 rounded-full bg-teal-600"></span>
                   )}
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -178,7 +178,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, canC
                 href="https://aistudio.google.com/apikey"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline"
               >
                 <span>Lấy Key miễn phí</span>
                 <ExternalLink className="w-3 h-3" />
@@ -197,7 +197,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, canC
                 setError('');
               }}
               placeholder="Nhập API Key (bắt đầu bằng AIzaSy... hoặc AQ...)"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-mono"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-500 outline-none text-sm font-mono"
               autoFocus
             />
             {error && (
@@ -211,7 +211,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, canC
           {/* Chọn Model */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2 flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-indigo-600" />
+              <Cpu className="w-3.5 h-3.5 text-teal-600" />
               <span>3. Chọn Model AI ưu tiên (Tự động xoay vòng dự phòng khi quá tải)</span>
             </label>
             <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
@@ -230,7 +230,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, canC
                     }}
                     className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       isSelected
-                        ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/50 text-indigo-950 dark:text-white'
+                        ? 'border-teal-600 bg-teal-50/70 dark:bg-teal-950/50 text-teal-950 dark:text-white'
                         : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
                     }`}
                   >
@@ -248,7 +248,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, canC
                       </p>
                     </div>
                     {isSelected && (
-                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 shrink-0 ml-2">
+                      <span className="text-xs font-bold text-teal-600 dark:text-teal-400 shrink-0 ml-2">
                         ✓ Đang chọn
                       </span>
                     )}
@@ -258,8 +258,8 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, canC
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-400">
-            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+          <div className="p-3 rounded-xl bg-teal-50/60 dark:bg-slate-800/60 border border-teal-200/70 dark:border-slate-700 flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-400">
+            <ShieldCheck className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
             <span>
               API Key được lưu trữ an toàn trực tiếp trên trình duyệt của bạn (LocalStorage). Khi model chính bận (503), hệ thống sẽ tự động chuyển tiếp qua chuỗi model dự phòng.
             </span>
@@ -278,7 +278,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, canC
             )}
             <button
               type="submit"
-              className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-teal-600 hover:from-indigo-700 hover:to-teal-700 text-white rounded-xl font-bold text-sm shadow-md transition-all cursor-pointer"
+              className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl font-bold text-sm shadow-md transition-all cursor-pointer"
             >
               <Check className="w-4 h-4" />
               <span>Lưu cấu hình & Sử dụng</span>
