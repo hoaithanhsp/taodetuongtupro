@@ -548,13 +548,25 @@ const App: React.FC = () => {
             <div className="no-print">
               <BbtQuickGenerator
                 examContent={content?.examContent || ''}
-                onUpdateExamContent={(updatedExam) =>
-                  content && setContent({ ...content, examContent: updatedExam })
-                }
+                onUpdateExamContent={(updatedExam) => {
+                  setContent((prev) => ({
+                    analysis: prev?.analysis || 'Chưa có ma trận phân tích.',
+                    examContent: updatedExam,
+                    detailedSolution: prev?.detailedSolution || '',
+                  }));
+                  setStatus(AppStatus.SUCCESS);
+                  setActiveTab('exam');
+                }}
                 solutionContent={content?.detailedSolution || ''}
-                onUpdateSolutionContent={(updatedSol) =>
-                  content && setContent({ ...content, detailedSolution: updatedSol })
-                }
+                onUpdateSolutionContent={(updatedSol) => {
+                  setContent((prev) => ({
+                    analysis: prev?.analysis || 'Chưa có ma trận phân tích.',
+                    examContent: prev?.examContent || '',
+                    detailedSolution: updatedSol,
+                  }));
+                  setStatus(AppStatus.SUCCESS);
+                  setActiveTab('solution');
+                }}
                 defaultOpen={false}
               />
             </div>

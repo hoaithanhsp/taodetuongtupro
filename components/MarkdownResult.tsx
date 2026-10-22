@@ -7,6 +7,7 @@ import {
   renderFigureSpecToSvg,
   downloadSvgAsPng,
   sanitizeAndValidateFigureSpec,
+  extractPrecedingQuestionContext,
   svgToDataUrl,
   svgToPngDataUrl,
   copySvgAsPngToClipboard,
@@ -58,7 +59,7 @@ const FigureImageCard: React.FC<{ svg: string; figureType?: string }> = ({ svg, 
           src={imgSrc}
           alt={badgeLabel}
           className="max-w-full h-auto"
-          style={{ maxHeight: '300px' }}
+          style={{ maxHeight: '320px' }}
         />
       </div>
       <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2 no-print">
@@ -92,6 +93,10 @@ const MarkdownResult: React.FC<MarkdownResultProps> = ({ content, className }) =
       (_m, body) => `\n\`\`\`figure-json\n${String(body).trim()}\n\`\`\`\n`
     );
     withFences = withFences.replace(
+      /:::figure\s*([\s\S]*?):::/gi,
+      (_m, body) => `\n\`\`\`figure-json\n${String(body).trim()}\n\`\`\`\n`
+    );
+    withFences = withFences.replace(
       /<table[^>]*class=["'][^"']*bbt-table[^"']*["'][^>]*>([\s\S]*?)<\/table>/gi,
       (fullTable) => {
         const spec = parseHtmlBbtTableToSpec(fullTable);
@@ -105,7 +110,7 @@ const MarkdownResult: React.FC<MarkdownResultProps> = ({ content, className }) =
       /```figure-json\s*([\s\S]*?)```/gi,
       (full, jsonBody, offset) => {
         try {
-          const before = withFences.slice(Math.max(0, Number(offset) - 600), Number(offset));
+          const before = extractPrecedingQuestionContext(withFences, Number(offset) || 0);
           const parsed = JSON.parse(String(jsonBody).trim());
           const fixed = sanitizeAndValidateFigureSpec(parsed, before);
           if (!fixed) return '';

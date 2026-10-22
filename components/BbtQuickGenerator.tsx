@@ -33,120 +33,147 @@ const PRESET_GRAPH_SPECS = [
     fn: 'x^3 - 3*x + 1',
     xmin: -3,
     xmax: 3,
-    integralEnabled: false,
+    mode: 'none' as 'none' | 'shade' | 'revolve',
     intA: -1,
     intB: 2,
   },
   {
-    label: 'Trùng phương: x⁴ - 2x²',
-    fn: 'x^4 - 2*x^2',
-    xmin: -2.5,
-    xmax: 2.5,
-    integralEnabled: false,
+    label: 'Bậc 3: -x³ + 3x',
+    fn: '-x^3 + 3*x',
+    xmin: -3,
+    xmax: 3,
+    mode: 'none' as 'none' | 'shade' | 'revolve',
     intA: -1,
     intB: 1,
   },
   {
-    label: 'Phân thức: (x+1)/(x-1)',
-    fn: '(x+1)/(x-1)',
-    xmin: -4,
-    xmax: 6,
-    integralEnabled: false,
+    label: 'Trùng phương: x⁴ - 2x² - 1',
+    fn: 'x^4 - 2*x^2 - 1',
+    xmin: -2.5,
+    xmax: 2.5,
+    mode: 'none' as 'none' | 'shade' | 'revolve',
+    intA: -1,
+    intB: 1,
+  },
+  {
+    label: 'Trùng phương: -x⁴ + 2x² + 1',
+    fn: '-x^4 + 2*x^2 + 1',
+    xmin: -2.5,
+    xmax: 2.5,
+    mode: 'none' as 'none' | 'shade' | 'revolve',
+    intA: -1,
+    intB: 1,
+  },
+  {
+    label: 'Phân thức: (2x+1)/(x-1)',
+    fn: '(2*x+1)/(x-1)',
+    xmin: -3,
+    xmax: 5,
+    mode: 'none' as 'none' | 'shade' | 'revolve',
     intA: 2,
     intB: 4,
   },
   {
-    label: 'Miền tích phân: -x² + 4',
+    label: 'Tích phân diện tích: -x² + 4',
     fn: '-x^2 + 4',
     xmin: -3,
     xmax: 3,
-    integralEnabled: true,
+    mode: 'shade' as 'none' | 'shade' | 'revolve',
     intA: -2,
     intB: 2,
   },
   {
-    label: 'Dao động điều hoà: 4*cos(2*x)',
-    fn: '4*cos(2*x)',
-    xmin: -3.14,
-    xmax: 3.14,
-    integralEnabled: false,
+    label: 'Khối tròn xoay Ox: sqrt(x)',
+    fn: 'sqrt(x)',
+    xmin: -0.5,
+    xmax: 4.5,
+    mode: 'revolve' as 'none' | 'shade' | 'revolve',
     intA: 0,
-    intB: 1.57,
+    intB: 4,
   },
 ];
 
 const PRESET_GEO3D_SPECS = [
   {
     label: 'Chóp S.ABC (SA ⊥ đáy)',
-    kind: 'pyramid-tri',
-    apex: 'S',
-    base: 'A,B,C',
+    preset: 'pyramid-tri',
     foot: 'A',
-    az: -35,
-    el: 22,
+    angle: 30,
+    ratio: 0.5,
+    extra: ['point M midpoint(B,C)', 'segment A M', 'segment S M'],
+    marks: ['rightangle S A B', 'rightangle S A C'],
   },
   {
-    label: 'Chóp đều S.ABCD',
-    kind: 'pyramid-quad',
-    apex: 'S',
-    base: 'A,B,C,D',
+    label: 'Chóp đều S.ABCD (SO ⊥ đáy)',
+    preset: 'pyramid-square',
     foot: 'center',
-    az: -38,
-    el: 24,
+    angle: 30,
+    ratio: 0.5,
+    extra: ['point O center(ABCD)', 'segment A C', 'segment B D', 'segment S O'],
+    marks: ['rightangle S O B'],
   },
   {
     label: 'Chóp S.ABCD (SA ⊥ đáy)',
-    kind: 'pyramid-quad',
-    apex: 'S',
-    base: 'A,B,C,D',
+    preset: 'pyramid-square',
     foot: 'A',
-    az: -35,
-    el: 22,
+    angle: 30,
+    ratio: 0.5,
+    extra: ['segment A C', 'segment B D'],
+    marks: ['rightangle S A B', 'rightangle S A D'],
   },
   {
-    label: 'Lăng trụ ABC.A\'B\'C\'',
-    kind: 'prism-tri',
-    apex: 'S',
-    base: 'A,B,C',
-    foot: 'A',
-    az: -35,
-    el: 22,
+    label: 'Tứ diện vuông O.ABC',
+    preset: 'tetra-right',
+    foot: 'O',
+    angle: 30,
+    ratio: 0.5,
+    extra: [],
+    marks: ['rightangle C O A', 'rightangle C O B', 'rightangle A O B'],
   },
   {
-    label: 'Hình hộp ABCD.A\'B\'C\'D\'',
-    kind: 'prism-quad',
-    apex: 'S',
-    base: 'A,B,C,D',
+    label: "Lăng trụ đứng ABC.A'B'C'",
+    preset: 'prism-tri',
     foot: 'A',
-    az: -35,
-    el: 22,
+    angle: 30,
+    ratio: 0.5,
+    extra: [],
+    marks: ["rightangle A' A B"],
+  },
+  {
+    label: "Hình hộp ABCD.A'B'C'D'",
+    preset: 'box',
+    foot: 'A',
+    angle: 30,
+    ratio: 0.5,
+    extra: ["segment A C'"],
+    marks: [],
   },
   {
     label: 'Hình nón đỉnh S, tâm O',
-    kind: 'cone',
-    apex: 'S',
-    base: 'A,B',
+    preset: 'cone',
     foot: 'center',
-    az: -35,
-    el: 20,
+    angle: 90,
+    ratio: 0.33,
+    extra: [],
+    marks: [],
   },
   {
-    label: 'Hình trụ tâm O, O\'',
-    kind: 'cylinder',
-    apex: 'O\'',
-    base: 'A,B',
+    label: "Hình trụ tâm O, O'",
+    preset: 'cylinder',
     foot: 'center',
-    az: -35,
-    el: 20,
+    angle: 90,
+    ratio: 0.33,
+    extra: [],
+    marks: [],
   },
   {
-    label: 'Mặt cầu tâm I',
-    kind: 'sphere',
-    apex: 'I',
-    base: 'A,B',
+    label: 'Mặt cầu tâm O',
+    preset: 'sphere',
     foot: 'center',
-    az: -30,
-    el: 20,
+    angle: 90,
+    ratio: 0.33,
+    extra: [],
+    marks: [],
   },
 ];
 
@@ -155,15 +182,14 @@ const PRESET_GEO2D_JSON = [
     label: 'Tam giác vuông ABC & đường cao AH',
     spec: {
       type: 'geo2d',
-      axes: false,
-      grid: false,
+      preset: 'custom',
       points: [
-        { id: 'A', x: 0, y: 3, label: 'A', pos: 'N' },
-        { id: 'B', x: -2, y: 0, label: 'B', pos: 'SW' },
-        { id: 'C', x: 4.5, y: 0, label: 'C', pos: 'SE' },
-        { id: 'H', x: 0, y: 0, label: 'H', pos: 'S' },
+        { id: 'A', x: 0, y: 2.8, label: 'A' },
+        { id: 'B', x: -1.8, y: 0, label: 'B' },
+        { id: 'C', x: 4.2, y: 0, label: 'C' },
+        { id: 'H', x: 0, y: 0, label: 'H' },
       ],
-      polygons: [{ points: ['A', 'B', 'C'], fill: 'rgba(59,130,246,0.06)' }],
+      polygons: [{ points: ['A', 'B', 'C'] }],
       segments: [{ from: 'A', to: 'H', style: 'dashed' }],
       rightAngles: [
         { at: 'H', p1: 'A', p2: 'C' },
@@ -172,18 +198,33 @@ const PRESET_GEO2D_JSON = [
     },
   },
   {
+    label: 'Hình bình hành ABCD & tâm O',
+    spec: {
+      type: 'geo2d',
+      preset: 'parallelogram',
+      params: { a: 4, b: 2.5, angle: 62, center: true },
+    },
+  },
+  {
+    label: 'Hình thang vuông ABCD',
+    spec: {
+      type: 'geo2d',
+      preset: 'trapezoid-right',
+      params: { a: 4.2, b: 2.4, h: 2.3 },
+    },
+  },
+  {
     label: 'Đường tròn (O) & dây cung AB',
     spec: {
       type: 'geo2d',
-      axes: false,
-      grid: false,
+      preset: 'custom',
       points: [
-        { id: 'O', x: 0, y: 0, label: 'O', pos: 'S' },
-        { id: 'A', x: -2.4, y: 1.8, label: 'A', pos: 'NW' },
-        { id: 'B', x: 2.4, y: 1.8, label: 'B', pos: 'NE' },
-        { id: 'H', x: 0, y: 1.8, label: 'H', pos: 'N' },
+        { id: 'O', x: 0, y: 0, label: 'O' },
+        { id: 'A', x: -2.0, y: 1.5, label: 'A' },
+        { id: 'B', x: 2.0, y: 1.5, label: 'B' },
+        { id: 'H', x: 0, y: 1.5, label: 'H' },
       ],
-      circles: [{ center: 'O', radius: 3 }],
+      circles: [{ center: 'O', radius: 2.5 }],
       segments: [
         { from: 'A', to: 'B' },
         { from: 'O', to: 'A', style: 'dashed' },
@@ -194,21 +235,36 @@ const PRESET_GEO2D_JSON = [
     },
   },
   {
+    label: 'Phương hướng tàu thuyền (A → B → C)',
+    spec: {
+      type: 'geo2d',
+      preset: 'navigation',
+      params: {
+        ab: 24,
+        bc: 32,
+        bearingAB: 'N45E',
+        bearingBC: 'S30E',
+        labelAB: '24 km',
+        labelBC: '32 km',
+        labelAC: '?',
+      },
+    },
+  },
+  {
     label: 'Vật lý: Tổng hợp hai lực F₁, F₂',
     spec: {
       type: 'geo2d',
-      axes: true,
-      grid: true,
+      preset: 'custom',
       points: [
-        { id: 'O', x: 0, y: 0, label: 'O', pos: 'SW' },
-        { id: 'F1', x: 4, y: 0, label: 'F₁', pos: 'SE' },
-        { id: 'F2', x: 1.5, y: 3, label: 'F₂', pos: 'NW' },
-        { id: 'F', x: 5.5, y: 3, label: 'F_hl', pos: 'NE' },
+        { id: 'O', x: 0, y: 0, label: 'O' },
+        { id: 'F1', x: 3.5, y: 0, label: 'F₁' },
+        { id: 'F2', x: 1.2, y: 2.4, label: 'F₂' },
+        { id: 'F', x: 4.7, y: 2.4, label: 'F' },
       ],
       vectors: [
-        { from: 'O', to: 'F1', color: '#2563eb' },
-        { from: 'O', to: 'F2', color: '#16a34a' },
-        { from: 'O', to: 'F', color: '#dc2626' },
+        { from: 'O', to: 'F1' },
+        { from: 'O', to: 'F2' },
+        { from: 'O', to: 'F' },
       ],
       segments: [
         { from: 'F1', to: 'F', style: 'dashed' },
@@ -236,17 +292,17 @@ const BbtQuickGenerator: React.FC<BbtQuickGeneratorProps> = ({
   const [graphFn, setGraphFn] = useState('x^3 - 3*x + 1');
   const [graphXmin, setGraphXmin] = useState<number>(-3);
   const [graphXmax, setGraphXmax] = useState<number>(3);
-  const [integralEnabled, setIntegralEnabled] = useState<boolean>(false);
+  const [graphMode, setGraphMode] = useState<'none' | 'shade' | 'revolve'>('none');
   const [intA, setIntA] = useState<number>(-1);
   const [intB, setIntB] = useState<number>(2);
 
   // State cho Hình 3D (Geo3D)
-  const [geo3dKind, setGeo3dKind] = useState('pyramid-quad');
-  const [geo3dApex, setGeo3dApex] = useState('S');
-  const [geo3dBase, setGeo3dBase] = useState('A,B,C,D');
+  const [geo3dPreset, setGeo3dPreset] = useState('pyramid-tri');
   const [geo3dFoot, setGeo3dFoot] = useState('A');
-  const [geo3dAz, setGeo3dAz] = useState<number>(-35);
-  const [geo3dEl, setGeo3dEl] = useState<number>(22);
+  const [geo3dAngle, setGeo3dAngle] = useState<number>(30);
+  const [geo3dRatio, setGeo3dRatio] = useState<number>(0.5);
+  const [geo3dExtra, setGeo3dExtra] = useState<string[]>(PRESET_GEO3D_SPECS[0].extra);
+  const [geo3dMarks, setGeo3dMarks] = useState<string[]>(PRESET_GEO3D_SPECS[0].marks);
 
   // State cho Hình 2D (Geo2D)
   const [geo2dJson, setGeo2dJson] = useState<string>(() =>
@@ -269,28 +325,44 @@ const BbtQuickGenerator: React.FC<BbtQuickGeneratorProps> = ({
       if (!graphFn.trim()) return null;
       const spec: Record<string, any> = {
         type: 'graph',
-        fn: graphFn.trim(),
-        xmin: Number(graphXmin) || -4,
-        xmax: Number(graphXmax) || 4,
+        fn: [graphFn.trim()],
+        xRange: [Number(graphXmin) || -3, Number(graphXmax) || 3],
+        asymptotes: 'auto',
+        points: 'extrema+intercepts',
       };
-      if (integralEnabled) {
-        spec.integral = { a: Number(intA) || 0, b: Number(intB) || 1 };
+      if (graphMode === 'shade') {
+        spec.shade = {
+          fn: graphFn.trim(),
+          fn2: '0',
+          from: Number(intA) || 0,
+          to: Number(intB) || 1,
+        };
+      } else if (graphMode === 'revolve') {
+        spec.revolve = {
+          fn: graphFn.trim(),
+          from: Number(intA) || 0,
+          to: Number(intB) || 2,
+        };
       }
       return spec;
     }
     if (activeTab === 'geo3d') {
-      const baseArr = geo3dBase
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
+      const isRound = /^(cone|cylinder|sphere|frustum)/i.test(geo3dPreset);
       return {
         type: 'geo3d',
-        kind: geo3dKind,
-        apex: geo3dApex.trim() || 'S',
-        base: baseArr.length >= 2 ? baseArr : ['A', 'B', 'C'],
-        foot: geo3dFoot.trim() || 'A',
-        az: Number(geo3dAz) || -35,
-        el: Number(geo3dEl) || 22,
+        preset: geo3dPreset,
+        params: {
+          a: 2,
+          h: 2.6,
+          apexOver: geo3dFoot === 'A' ? 'A' : undefined,
+        },
+        foot: geo3dFoot,
+        view: {
+          angle: isRound ? 90 : Number(geo3dAngle) || 30,
+          ratio: isRound ? 0.33 : Number(geo3dRatio) || 0.5,
+        },
+        extra: geo3dExtra,
+        marks: geo3dMarks,
       };
     }
     if (activeTab === 'geo2d') {
@@ -308,15 +380,15 @@ const BbtQuickGenerator: React.FC<BbtQuickGeneratorProps> = ({
     graphFn,
     graphXmin,
     graphXmax,
-    integralEnabled,
+    graphMode,
     intA,
     intB,
-    geo3dKind,
-    geo3dApex,
-    geo3dBase,
+    geo3dPreset,
     geo3dFoot,
-    geo3dAz,
-    geo3dEl,
+    geo3dAngle,
+    geo3dRatio,
+    geo3dExtra,
+    geo3dMarks,
     geo2dJson,
   ]);
 
@@ -373,39 +445,31 @@ const BbtQuickGenerator: React.FC<BbtQuickGeneratorProps> = ({
     if (!svgStr || !currentSpec) return;
     const updateFn = targetDoc === 'exam' ? onUpdateExamContent : onUpdateSolutionContent;
     const sourceText = targetDoc === 'exam' ? examContent : solutionContent;
-    if (!updateFn || !sourceText) return;
+    if (!updateFn) return;
 
     const jsonLine = JSON.stringify(currentSpec);
-    const scriptTag = `<script type="application/json" class="figure-json">${jsonLine}</script>`;
-    const renderedImgBlock = renderFiguresInHtml(scriptTag);
+    const fenceBlock = `\n\`\`\`figure-json\n${jsonLine}\n\`\`\`\n`;
 
     const qNum = selectedQuestion;
-    let updated = sourceText;
+    let updated = sourceText || '';
     let inserted = false;
 
-    const htmlQuestionRegex = new RegExp(
-      `(<p[^>]*>[\\s\\S]*?Câu\\s+${qNum}\\s*[.:][\\s\\S]*?<\\/p>)`,
-      'i'
-    );
-    if (htmlQuestionRegex.test(updated)) {
-      updated = updated.replace(htmlQuestionRegex, `$1\n${renderedImgBlock}`);
+    if (!updated.trim()) {
+      updated = `**Câu ${qNum}.**\n${fenceBlock}`;
       inserted = true;
     } else {
       const mdQuestionRegex = new RegExp(
-        `((?:\\*\\*)?Câu\\s+${qNum}\\s*[.:](?:\\*\\*)?[^\\n]*\\n)`,
+        `((?:^|\\n)[^\\n]*?Câu\\s+${qNum}\\b[^\\n]*\\n)`,
         'i'
       );
       if (mdQuestionRegex.test(updated)) {
-        updated = updated.replace(
-          mdQuestionRegex,
-          `$1\n\`\`\`figure-json\n${jsonLine}\n\`\`\`\n`
-        );
+        updated = updated.replace(mdQuestionRegex, `$1${fenceBlock}`);
         inserted = true;
       }
     }
 
     if (!inserted) {
-      updated = `${updated}\n\n\`\`\`figure-json\n${jsonLine}\n\`\`\`\n`;
+      updated = `${updated}\n${fenceBlock}`;
     }
 
     updateFn(updated);
@@ -536,22 +600,30 @@ const BbtQuickGenerator: React.FC<BbtQuickGeneratorProps> = ({
                       />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="chk-integral"
-                      type="checkbox"
-                      checked={integralEnabled}
-                      onChange={(e) => setIntegralEnabled(e.target.checked)}
-                      className="rounded border-slate-300 text-indigo-600"
-                    />
-                    <label htmlFor="chk-integral" className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Tô miền phẳng tích phân từ x = a đến x = b
-                    </label>
+                  <div className="grid grid-cols-3 gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                    {[
+                      { id: 'none', label: 'Đồ thị chuẩn' },
+                      { id: 'shade', label: 'Miền tích phân' },
+                      { id: 'revolve', label: 'Khối tròn xoay' },
+                    ].map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => setGraphMode(m.id as 'none' | 'shade' | 'revolve')}
+                        className={`py-1 px-2 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+                          graphMode === m.id
+                            ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-2xs'
+                            : 'text-slate-600 dark:text-slate-400'
+                        }`}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
                   </div>
-                  {integralEnabled && (
+                  {graphMode !== 'none' && (
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-[11px] text-slate-600">Cận a:</label>
+                        <label className="text-[11px] text-slate-600 dark:text-slate-400">Cận a:</label>
                         <input
                           type="number"
                           step="0.5"
@@ -561,7 +633,7 @@ const BbtQuickGenerator: React.FC<BbtQuickGeneratorProps> = ({
                         />
                       </div>
                       <div>
-                        <label className="text-[11px] text-slate-600">Cận b:</label>
+                        <label className="text-[11px] text-slate-600 dark:text-slate-400">Cận b:</label>
                         <input
                           type="number"
                           step="0.5"
@@ -581,7 +653,7 @@ const BbtQuickGenerator: React.FC<BbtQuickGeneratorProps> = ({
                           setGraphFn(item.fn);
                           setGraphXmin(item.xmin);
                           setGraphXmax(item.xmax);
-                          setIntegralEnabled(item.integralEnabled);
+                          setGraphMode(item.mode);
                           setIntA(item.intA);
                           setIntB(item.intB);
                         }}
@@ -599,125 +671,142 @@ const BbtQuickGenerator: React.FC<BbtQuickGeneratorProps> = ({
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                        Loại khối 3D:
+                        Loại khối 3D (preset):
                       </label>
                       <select
-                        value={geo3dKind}
-                        onChange={(e) => setGeo3dKind(e.target.value)}
+                        value={geo3dPreset}
+                        onChange={(e) => {
+                          setGeo3dPreset(e.target.value);
+                          setGeo3dExtra([]);
+                          setGeo3dMarks([]);
+                        }}
                         className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
                       >
                         <option value="pyramid-tri">Chóp tam giác (S.ABC)</option>
-                        <option value="pyramid-quad">Chóp tứ giác (S.ABCD)</option>
-                        <option value="prism-tri">Lăng trụ tam giác</option>
-                        <option value="prism-quad">Hình hộp / Lăng trụ tứ giác</option>
-                        <option value="cone">Hình nón</option>
-                        <option value="cylinder">Hình trụ</option>
-                        <option value="sphere">Mặt cầu</option>
-                        <option value="frustum">Chóp cụt</option>
+                        <option value="pyramid-square">Chóp tứ giác (S.ABCD)</option>
+                        <option value="tetra-right">Tứ diện vuông (O.ABC)</option>
+                        <option value="prism-tri">Lăng trụ tam giác (ABC.A&apos;B&apos;C&apos;)</option>
+                        <option value="prism-quad">Lăng trụ tứ giác (ABCD.A&apos;B&apos;C&apos;D&apos;)</option>
+                        <option value="box">Hình hộp chữ nhật</option>
+                        <option value="cube">Hình lập phương</option>
+                        <option value="pyramid-hex">Chóp lục giác đều (S.ABCDEF)</option>
+                        <option value="cone">Hình nón (Đỉnh S, tâm O)</option>
+                        <option value="cylinder">Hình trụ (Tâm O, O&apos;)</option>
+                        <option value="sphere">Mặt cầu (Tâm O)</option>
+                        <option value="frustum">Hình nón cụt</option>
                       </select>
                     </div>
                     <div>
                       <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                        Chân đường cao (foot):
+                        Chân đường cao:
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={geo3dFoot}
                         onChange={(e) => setGeo3dFoot(e.target.value)}
-                        placeholder="A hoặc center"
-                        className="w-full px-2.5 py-1.5 text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <label className="text-[11px] text-slate-600 dark:text-slate-400">Đỉnh (apex):</label>
-                      <input
-                        type="text"
-                        value={geo3dApex}
-                        onChange={(e) => setGeo3dApex(e.target.value)}
-                        className="w-full px-2 py-1 text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <label className="text-[11px] text-slate-600 dark:text-slate-400">
-                        Đáy (cách nhau dấu phẩy):
-                      </label>
-                      <input
-                        type="text"
-                        value={geo3dBase}
-                        onChange={(e) => setGeo3dBase(e.target.value)}
-                        className="w-full px-2 py-1 text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
-                      />
+                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
+                      >
+                        <option value="A">Đỉnh A (SA ⊥ đáy)</option>
+                        <option value="center">Tâm O của đáy (Chóp đều)</option>
+                      </select>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-[11px] text-slate-600 dark:text-slate-400">
-                        Góc xoay ngang (az: {geo3dAz}°):
+                        Góc chiếu xiên ({geo3dAngle}°):
                       </label>
                       <input
                         type="range"
-                        min="-80"
-                        max="80"
-                        value={geo3dAz}
-                        onChange={(e) => setGeo3dAz(Number(e.target.value))}
+                        min="15"
+                        max="65"
+                        value={geo3dAngle}
+                        onChange={(e) => setGeo3dAngle(Number(e.target.value))}
                         className="w-full"
                       />
                     </div>
                     <div>
                       <label className="text-[11px] text-slate-600 dark:text-slate-400">
-                        Góc nhìn cao (el: {geo3dEl}°):
+                        Hệ số co chiều sâu ({geo3dRatio}):
                       </label>
                       <input
                         type="range"
-                        min="10"
-                        max="55"
-                        value={geo3dEl}
-                        onChange={(e) => setGeo3dEl(Number(e.target.value))}
+                        min="0.3"
+                        max="0.7"
+                        step="0.05"
+                        value={geo3dRatio}
+                        onChange={(e) => setGeo3dRatio(Number(e.target.value))}
                         className="w-full"
                       />
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {PRESET_GEO3D_SPECS.map((item) => (
-                      <button
-                        key={item.label}
-                        type="button"
-                        onClick={() => {
-                          setGeo3dKind(item.kind);
-                          setGeo3dApex(item.apex);
-                          setGeo3dBase(item.base);
-                          setGeo3dFoot(item.foot);
-                          setGeo3dAz(item.az);
-                          setGeo3dEl(item.el);
-                        }}
-                        className="text-[11px] px-2 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-teal-50 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-slate-700 transition-colors cursor-pointer"
-                      >
-                        {item.label}
-                      </button>
-                    ))}
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                      Chọn nhanh mẫu Hình không gian 3D chuẩn SGK:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {PRESET_GEO3D_SPECS.map((item) => (
+                        <button
+                          key={item.label}
+                          type="button"
+                          onClick={() => {
+                            setGeo3dPreset(item.preset);
+                            setGeo3dFoot(item.foot);
+                            setGeo3dAngle(item.angle);
+                            setGeo3dRatio(item.ratio);
+                            setGeo3dExtra(item.extra);
+                            setGeo3dMarks(item.marks);
+                          }}
+                          className="text-[11px] px-2 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-teal-50 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-slate-700 transition-colors cursor-pointer"
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Điểm phụ & Đoạn thẳng phụ (mỗi dòng 1 lệnh, vd: point M midpoint(B,C) | segment S M):
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={geo3dExtra.join('\n')}
+                      onChange={(e) =>
+                        setGeo3dExtra(
+                          e.target.value
+                            .split('\n')
+                            .map((s) => s.trim())
+                            .filter(Boolean)
+                        )
+                      }
+                      placeholder={'point M midpoint(B,C)\nsegment A M\nsegment S M'}
+                      className="w-full p-2 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white outline-none"
+                    />
                   </div>
                 </>
               )}
 
               {activeTab === 'geo2d' && (
                 <>
-                  <div className="flex flex-wrap gap-1.5">
-                    {PRESET_GEO2D_JSON.map((item) => (
-                      <button
-                        key={item.label}
-                        type="button"
-                        onClick={() => setGeo2dJson(JSON.stringify(item.spec, null, 2))}
-                        className="text-[11px] px-2 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-indigo-50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-slate-700 transition-colors cursor-pointer"
-                      >
-                        {item.label}
-                      </button>
-                    ))}
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                      Chọn nhanh mẫu Hình phẳng 2D & Vector Vật lý:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {PRESET_GEO2D_JSON.map((item) => (
+                        <button
+                          key={item.label}
+                          type="button"
+                          onClick={() => setGeo2dJson(JSON.stringify(item.spec, null, 2))}
+                          className="text-[11px] px-2 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-indigo-50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-slate-700 transition-colors cursor-pointer"
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <div>
                     <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                      Cấu hình toạ độ Hình 2D / Vector (JSON):
+                      Cấu hình Hình 2D / Vector (JSON):
                     </label>
                     <textarea
                       rows={5}
@@ -791,14 +880,14 @@ const BbtQuickGenerator: React.FC<BbtQuickGeneratorProps> = ({
             </div>
 
             {/* Cột phải: Xem trước ảnh 300 DPI */}
-            <div className="lg:col-span-7 flex flex-col items-center justify-center bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 min-h-[200px]">
+            <div className="lg:col-span-7 flex flex-col items-center justify-center bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 min-h-[240px]">
               {pngUrl ? (
                 <>
                   <img
                     src={pngUrl}
                     alt="Xem trước hình minh hoạ 300 DPI"
                     className="max-w-full h-auto bg-white rounded-lg"
-                    style={{ maxHeight: '250px' }}
+                    style={{ maxHeight: '280px' }}
                   />
                   <span className="text-[11px] text-slate-400 mt-2 text-center">
                     Ảnh chuẩn 300 DPI — Hiển thị trực tiếp trên web và tự động nhúng vào file Word (.docx)
