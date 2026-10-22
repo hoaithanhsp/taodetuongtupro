@@ -1,0 +1,820 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  renderFigureSpecToSvg,
+  svgToDataUrl,
+  svgToPngDataUrl,
+  copySvgAsPngToClipboard,
+  downloadSvgAsPng,
+  renderFiguresInHtml,
+} from '../services/figureEngine';
+
+interface BbtQuickGeneratorProps {
+  examContent?: string;
+  onUpdateExamContent?: (newContent: string) => void;
+  solutionContent?: string;
+  onUpdateSolutionContent?: (newContent: string) => void;
+  defaultOpen?: boolean;
+}
+
+type StudioTab = 'bbt' | 'graph' | 'geo3d' | 'geo2d';
+
+const PRESET_BBT_FUNCTIONS = [
+  { label: 'Bậc 3: x³ - 3x + 1', fn: 'x^3 - 3*x + 1' },
+  { label: 'Bậc 3: -x³ + 3x² - 1', fn: '-x^3 + 3*x^2 - 1' },
+  { label: 'Trùng phương: x⁴ - 2x² - 3', fn: 'x^4 - 2*x^2 - 3' },
+  { label: 'Bậc 1/1: (2x+1)/(x-1)', fn: '(2*x+1)/(x-1)' },
+  { label: 'Bậc 2/1: (x²-x+1)/(x-1)', fn: '(x^2-x+1)/(x-1)' },
+  { label: 'Căn thức: sqrt(4 - x²)', fn: 'sqrt(4 - x^2)' },
+];
+
+const PRESET_GRAPH_SPECS = [
+  {
+    label: 'Bậc 3: x³ - 3x + 1',
+    fn: 'x^3 - 3*x + 1',
+    xmin: -3,
+    xmax: 3,
+    integralEnabled: false,
+    intA: -1,
+    intB: 2,
+  },
+  {
+    label: 'Trùng phương: x⁴ - 2x²',
+    fn: 'x^4 - 2*x^2',
+    xmin: -2.5,
+    xmax: 2.5,
+    integralEnabled: false,
+    intA: -1,
+    intB: 1,
+  },
+  {
+    label: 'Phân thức: (x+1)/(x-1)',
+    fn: '(x+1)/(x-1)',
+    xmin: -4,
+    xmax: 6,
+    integralEnabled: false,
+    intA: 2,
+    intB: 4,
+  },
+  {
+    label: 'Miền tích phân: -x² + 4',
+    fn: '-x^2 + 4',
+    xmin: -3,
+    xmax: 3,
+    integralEnabled: true,
+    intA: -2,
+    intB: 2,
+  },
+  {
+    label: 'Dao động điều hoà: 4*cos(2*x)',
+    fn: '4*cos(2*x)',
+    xmin: -3.14,
+    xmax: 3.14,
+    integralEnabled: false,
+    intA: 0,
+    intB: 1.57,
+  },
+];
+
+const PRESET_GEO3D_SPECS = [
+  {
+    label: 'Chóp S.ABC (SA ⊥ đáy)',
+    kind: 'pyramid-tri',
+    apex: 'S',
+    base: 'A,B,C',
+    foot: 'A',
+    az: -35,
+    el: 22,
+  },
+  {
+    label: 'Chóp đều S.ABCD',
+    kind: 'pyramid-quad',
+    apex: 'S',
+    base: 'A,B,C,D',
+    foot: 'center',
+    az: -38,
+    el: 24,
+  },
+  {
+    label: 'Chóp S.ABCD (SA ⊥ đáy)',
+    kind: 'pyramid-quad',
+    apex: 'S',
+    base: 'A,B,C,D',
+    foot: 'A',
+    az: -35,
+    el: 22,
+  },
+  {
+    label: 'Lăng trụ ABC.A\'B\'C\'',
+    kind: 'prism-tri',
+    apex: 'S',
+    base: 'A,B,C',
+    foot: 'A',
+    az: -35,
+    el: 22,
+  },
+  {
+    label: 'Hình hộp ABCD.A\'B\'C\'D\'',
+    kind: 'prism-quad',
+    apex: 'S',
+    base: 'A,B,C,D',
+    foot: 'A',
+    az: -35,
+    el: 22,
+  },
+  {
+    label: 'Hình nón đỉnh S, tâm O',
+    kind: 'cone',
+    apex: 'S',
+    base: 'A,B',
+    foot: 'center',
+    az: -35,
+    el: 20,
+  },
+  {
+    label: 'Hình trụ tâm O, O\'',
+    kind: 'cylinder',
+    apex: 'O\'',
+    base: 'A,B',
+    foot: 'center',
+    az: -35,
+    el: 20,
+  },
+  {
+    label: 'Mặt cầu tâm I',
+    kind: 'sphere',
+    apex: 'I',
+    base: 'A,B',
+    foot: 'center',
+    az: -30,
+    el: 20,
+  },
+];
+
+const PRESET_GEO2D_JSON = [
+  {
+    label: 'Tam giác vuông ABC & đường cao AH',
+    spec: {
+      type: 'geo2d',
+      axes: false,
+      grid: false,
+      points: [
+        { id: 'A', x: 0, y: 3, label: 'A', pos: 'N' },
+        { id: 'B', x: -2, y: 0, label: 'B', pos: 'SW' },
+        { id: 'C', x: 4.5, y: 0, label: 'C', pos: 'SE' },
+        { id: 'H', x: 0, y: 0, label: 'H', pos: 'S' },
+      ],
+      polygons: [{ points: ['A', 'B', 'C'], fill: 'rgba(59,130,246,0.06)' }],
+      segments: [{ from: 'A', to: 'H', style: 'dashed' }],
+      rightAngles: [
+        { at: 'H', p1: 'A', p2: 'C' },
+        { at: 'A', p1: 'B', p2: 'C' },
+      ],
+    },
+  },
+  {
+    label: 'Đường tròn (O) & dây cung AB',
+    spec: {
+      type: 'geo2d',
+      axes: false,
+      grid: false,
+      points: [
+        { id: 'O', x: 0, y: 0, label: 'O', pos: 'S' },
+        { id: 'A', x: -2.4, y: 1.8, label: 'A', pos: 'NW' },
+        { id: 'B', x: 2.4, y: 1.8, label: 'B', pos: 'NE' },
+        { id: 'H', x: 0, y: 1.8, label: 'H', pos: 'N' },
+      ],
+      circles: [{ center: 'O', radius: 3 }],
+      segments: [
+        { from: 'A', to: 'B' },
+        { from: 'O', to: 'A', style: 'dashed' },
+        { from: 'O', to: 'B', style: 'dashed' },
+        { from: 'O', to: 'H' },
+      ],
+      rightAngles: [{ at: 'H', p1: 'O', p2: 'B' }],
+    },
+  },
+  {
+    label: 'Vật lý: Tổng hợp hai lực F₁, F₂',
+    spec: {
+      type: 'geo2d',
+      axes: true,
+      grid: true,
+      points: [
+        { id: 'O', x: 0, y: 0, label: 'O', pos: 'SW' },
+        { id: 'F1', x: 4, y: 0, label: 'F₁', pos: 'SE' },
+        { id: 'F2', x: 1.5, y: 3, label: 'F₂', pos: 'NW' },
+        { id: 'F', x: 5.5, y: 3, label: 'F_hl', pos: 'NE' },
+      ],
+      vectors: [
+        { from: 'O', to: 'F1', color: '#2563eb' },
+        { from: 'O', to: 'F2', color: '#16a34a' },
+        { from: 'O', to: 'F', color: '#dc2626' },
+      ],
+      segments: [
+        { from: 'F1', to: 'F', style: 'dashed' },
+        { from: 'F2', to: 'F', style: 'dashed' },
+      ],
+      angles: [{ at: 'O', p1: 'F1', p2: 'F2', label: 'α' }],
+    },
+  },
+];
+
+const BbtQuickGenerator: React.FC<BbtQuickGeneratorProps> = ({
+  examContent = '',
+  onUpdateExamContent,
+  solutionContent = '',
+  onUpdateSolutionContent,
+  defaultOpen = false,
+}) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [activeTab, setActiveTab] = useState<StudioTab>('bbt');
+
+  // State cho BBT
+  const [fnInput, setFnInput] = useState('x^3 - 3*x + 1');
+
+  // State cho Đồ thị (Graph)
+  const [graphFn, setGraphFn] = useState('x^3 - 3*x + 1');
+  const [graphXmin, setGraphXmin] = useState<number>(-3);
+  const [graphXmax, setGraphXmax] = useState<number>(3);
+  const [integralEnabled, setIntegralEnabled] = useState<boolean>(false);
+  const [intA, setIntA] = useState<number>(-1);
+  const [intB, setIntB] = useState<number>(2);
+
+  // State cho Hình 3D (Geo3D)
+  const [geo3dKind, setGeo3dKind] = useState('pyramid-quad');
+  const [geo3dApex, setGeo3dApex] = useState('S');
+  const [geo3dBase, setGeo3dBase] = useState('A,B,C,D');
+  const [geo3dFoot, setGeo3dFoot] = useState('A');
+  const [geo3dAz, setGeo3dAz] = useState<number>(-35);
+  const [geo3dEl, setGeo3dEl] = useState<number>(22);
+
+  // State cho Hình 2D (Geo2D)
+  const [geo2dJson, setGeo2dJson] = useState<string>(() =>
+    JSON.stringify(PRESET_GEO2D_JSON[0].spec, null, 2)
+  );
+
+  // State chèn vào Đề thi / Lời giải
+  const [targetDoc, setTargetDoc] = useState<'exam' | 'solution'>('exam');
+  const [selectedQuestion, setSelectedQuestion] = useState<string>('1');
+  const [pngUrl, setPngUrl] = useState<string>('');
+  const [copied, setCopied] = useState(false);
+  const [insertedMsg, setInsertedMsg] = useState<string | null>(null);
+
+  const currentSpec = useMemo<Record<string, any> | null>(() => {
+    if (activeTab === 'bbt') {
+      if (!fnInput.trim()) return null;
+      return { type: 'bbt', fn: fnInput.trim() };
+    }
+    if (activeTab === 'graph') {
+      if (!graphFn.trim()) return null;
+      const spec: Record<string, any> = {
+        type: 'graph',
+        fn: graphFn.trim(),
+        xmin: Number(graphXmin) || -4,
+        xmax: Number(graphXmax) || 4,
+      };
+      if (integralEnabled) {
+        spec.integral = { a: Number(intA) || 0, b: Number(intB) || 1 };
+      }
+      return spec;
+    }
+    if (activeTab === 'geo3d') {
+      const baseArr = geo3dBase
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      return {
+        type: 'geo3d',
+        kind: geo3dKind,
+        apex: geo3dApex.trim() || 'S',
+        base: baseArr.length >= 2 ? baseArr : ['A', 'B', 'C'],
+        foot: geo3dFoot.trim() || 'A',
+        az: Number(geo3dAz) || -35,
+        el: Number(geo3dEl) || 22,
+      };
+    }
+    if (activeTab === 'geo2d') {
+      try {
+        const parsed = JSON.parse(geo2dJson);
+        return { ...parsed, type: 'geo2d' };
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }, [
+    activeTab,
+    fnInput,
+    graphFn,
+    graphXmin,
+    graphXmax,
+    integralEnabled,
+    intA,
+    intB,
+    geo3dKind,
+    geo3dApex,
+    geo3dBase,
+    geo3dFoot,
+    geo3dAz,
+    geo3dEl,
+    geo2dJson,
+  ]);
+
+  const svgStr = useMemo(() => {
+    if (!currentSpec) return '';
+    return renderFigureSpecToSvg(currentSpec);
+  }, [currentSpec]);
+
+  useEffect(() => {
+    let active = true;
+    if (!svgStr) {
+      setPngUrl('');
+      return;
+    }
+    setPngUrl(svgToDataUrl(svgStr));
+    svgToPngDataUrl(svgStr, 300).then((url) => {
+      if (active && url) setPngUrl(url);
+    });
+    return () => {
+      active = false;
+    };
+  }, [svgStr]);
+
+  const activeContent = targetDoc === 'exam' ? examContent : solutionContent;
+
+  const questionNumbers = useMemo(() => {
+    if (!activeContent) return ['1', '2', '3', '4', '5'];
+    const matches = [...activeContent.matchAll(/Câu\s+(\d+)\b/gi)];
+    const unique = Array.from(new Set(matches.map((m) => m[1])));
+    return unique.length > 0 ? unique : ['1', '2', '3', '4', '5'];
+  }, [activeContent]);
+
+  useEffect(() => {
+    if (questionNumbers.length > 0 && !questionNumbers.includes(selectedQuestion)) {
+      setSelectedQuestion(questionNumbers[0]);
+    }
+  }, [questionNumbers, selectedQuestion]);
+
+  const handleCopyImage = async () => {
+    if (!svgStr) return;
+    const ok = await copySvgAsPngToClipboard(svgStr, 300);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleDownloadPng = async () => {
+    if (!svgStr) return;
+    await downloadSvgAsPng(svgStr, `${activeTab}_300dpi.png`);
+  };
+
+  const handleInsertIntoQuestion = () => {
+    if (!svgStr || !currentSpec) return;
+    const updateFn = targetDoc === 'exam' ? onUpdateExamContent : onUpdateSolutionContent;
+    const sourceText = targetDoc === 'exam' ? examContent : solutionContent;
+    if (!updateFn || !sourceText) return;
+
+    const jsonLine = JSON.stringify(currentSpec);
+    const scriptTag = `<script type="application/json" class="figure-json">${jsonLine}</script>`;
+    const renderedImgBlock = renderFiguresInHtml(scriptTag);
+
+    const qNum = selectedQuestion;
+    let updated = sourceText;
+    let inserted = false;
+
+    const htmlQuestionRegex = new RegExp(
+      `(<p[^>]*>[\\s\\S]*?Câu\\s+${qNum}\\s*[.:][\\s\\S]*?<\\/p>)`,
+      'i'
+    );
+    if (htmlQuestionRegex.test(updated)) {
+      updated = updated.replace(htmlQuestionRegex, `$1\n${renderedImgBlock}`);
+      inserted = true;
+    } else {
+      const mdQuestionRegex = new RegExp(
+        `((?:\\*\\*)?Câu\\s+${qNum}\\s*[.:](?:\\*\\*)?[^\\n]*\\n)`,
+        'i'
+      );
+      if (mdQuestionRegex.test(updated)) {
+        updated = updated.replace(
+          mdQuestionRegex,
+          `$1\n\`\`\`figure-json\n${jsonLine}\n\`\`\`\n`
+        );
+        inserted = true;
+      }
+    }
+
+    if (!inserted) {
+      updated = `${updated}\n\n\`\`\`figure-json\n${jsonLine}\n\`\`\`\n`;
+    }
+
+    updateFn(updated);
+    const docLabel = targetDoc === 'exam' ? 'Đề thi' : 'Lời giải';
+    setInsertedMsg(`Đã chèn hình (${activeTab.toUpperCase()}) vào Câu ${qNum} (${docLabel})!`);
+    setTimeout(() => setInsertedMsg(null), 2800);
+  };
+
+  return (
+    <div className="mb-5 rounded-2xl p-4 border border-teal-200 dark:border-teal-800/70 bg-gradient-to-r from-teal-50/80 via-white to-indigo-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-teal-600 to-indigo-600 text-white font-bold text-xs shadow-sm">
+            300
+          </span>
+          <div>
+            <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              Studio Tạo Bảng biến thiên, Đồ thị & Hình học 2D/3D (300 DPI)
+            </span>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Tự động tính đạo hàm, cực trị, tiệm cận, vẽ đồ thị và dựng hình không gian chuẩn SGK — Dán thẳng vào từng câu hỏi
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="text-xs font-bold px-3.5 py-2 rounded-xl bg-teal-600 text-white hover:bg-teal-700 transition-colors shadow-xs cursor-pointer"
+        >
+          {isOpen ? 'Thu gọn Studio ▲' : 'Mở Studio Vẽ Hình (BBT / Đồ thị / 2D / 3D) ▼'}
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className="mt-4 pt-4 border-t border-teal-100 dark:border-slate-700">
+          {/* 4 Tabs chọn loại hình */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {[
+              { id: 'bbt', label: '📊 Bảng biến thiên (BBT)' },
+              { id: 'graph', label: '📈 Đồ thị hàm số & Tích phân' },
+              { id: 'geo3d', label: '🧊 Hình học không gian 3D' },
+              { id: 'geo2d', label: '📐 Hình phẳng 2D & Vector Vật lý' },
+            ].map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setActiveTab(t.id as StudioTab)}
+                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                  activeTab === t.id
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+            {/* Cột trái: Tham số cấu hình */}
+            <div className="lg:col-span-5 space-y-3">
+              {activeTab === 'bbt' && (
+                <>
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Nhập hàm số y = f(x):
+                    </label>
+                    <input
+                      type="text"
+                      value={fnInput}
+                      onChange={(e) => setFnInput(e.target.value)}
+                      placeholder="Ví dụ: x^3 - 3*x + 1 hoặc (2*x+1)/(x-1)"
+                      className="w-full px-3 py-2 text-sm font-mono rounded-xl border border-teal-300 dark:border-slate-600 focus:ring-2 focus:ring-teal-500 outline-none bg-white dark:bg-slate-800 dark:text-white"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PRESET_BBT_FUNCTIONS.map((item) => (
+                      <button
+                        key={item.fn}
+                        type="button"
+                        onClick={() => setFnInput(item.fn)}
+                        className="text-[11px] px-2 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-teal-50 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-slate-700 transition-colors cursor-pointer"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'graph' && (
+                <>
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Nhập hàm số y = f(x):
+                    </label>
+                    <input
+                      type="text"
+                      value={graphFn}
+                      onChange={(e) => setGraphFn(e.target.value)}
+                      placeholder="Ví dụ: x^3 - 3*x + 1"
+                      className="w-full px-3 py-2 text-sm font-mono rounded-xl border border-indigo-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 dark:text-white"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                        x_min:
+                      </label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        value={graphXmin}
+                        onChange={(e) => setGraphXmin(Number(e.target.value))}
+                        className="w-full px-2.5 py-1.5 text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                        x_max:
+                      </label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        value={graphXmax}
+                        onChange={(e) => setGraphXmax(Number(e.target.value))}
+                        className="w-full px-2.5 py-1.5 text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="chk-integral"
+                      type="checkbox"
+                      checked={integralEnabled}
+                      onChange={(e) => setIntegralEnabled(e.target.checked)}
+                      className="rounded border-slate-300 text-indigo-600"
+                    />
+                    <label htmlFor="chk-integral" className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Tô miền phẳng tích phân từ x = a đến x = b
+                    </label>
+                  </div>
+                  {integralEnabled && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] text-slate-600">Cận a:</label>
+                        <input
+                          type="number"
+                          step="0.5"
+                          value={intA}
+                          onChange={(e) => setIntA(Number(e.target.value))}
+                          className="w-full px-2.5 py-1 text-xs font-mono rounded-lg border border-slate-300 bg-white dark:bg-slate-800 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-slate-600">Cận b:</label>
+                        <input
+                          type="number"
+                          step="0.5"
+                          value={intB}
+                          onChange={(e) => setIntB(Number(e.target.value))}
+                          className="w-full px-2.5 py-1 text-xs font-mono rounded-lg border border-slate-300 bg-white dark:bg-slate-800 dark:text-white"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-1.5">
+                    {PRESET_GRAPH_SPECS.map((item) => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => {
+                          setGraphFn(item.fn);
+                          setGraphXmin(item.xmin);
+                          setGraphXmax(item.xmax);
+                          setIntegralEnabled(item.integralEnabled);
+                          setIntA(item.intA);
+                          setIntB(item.intB);
+                        }}
+                        className="text-[11px] px-2 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-indigo-50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-slate-700 transition-colors cursor-pointer"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'geo3d' && (
+                <>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                        Loại khối 3D:
+                      </label>
+                      <select
+                        value={geo3dKind}
+                        onChange={(e) => setGeo3dKind(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
+                      >
+                        <option value="pyramid-tri">Chóp tam giác (S.ABC)</option>
+                        <option value="pyramid-quad">Chóp tứ giác (S.ABCD)</option>
+                        <option value="prism-tri">Lăng trụ tam giác</option>
+                        <option value="prism-quad">Hình hộp / Lăng trụ tứ giác</option>
+                        <option value="cone">Hình nón</option>
+                        <option value="cylinder">Hình trụ</option>
+                        <option value="sphere">Mặt cầu</option>
+                        <option value="frustum">Chóp cụt</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                        Chân đường cao (foot):
+                      </label>
+                      <input
+                        type="text"
+                        value={geo3dFoot}
+                        onChange={(e) => setGeo3dFoot(e.target.value)}
+                        placeholder="A hoặc center"
+                        className="w-full px-2.5 py-1.5 text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-[11px] text-slate-600 dark:text-slate-400">Đỉnh (apex):</label>
+                      <input
+                        type="text"
+                        value={geo3dApex}
+                        onChange={(e) => setGeo3dApex(e.target.value)}
+                        className="w-full px-2 py-1 text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[11px] text-slate-600 dark:text-slate-400">
+                        Đáy (cách nhau dấu phẩy):
+                      </label>
+                      <input
+                        type="text"
+                        value={geo3dBase}
+                        onChange={(e) => setGeo3dBase(e.target.value)}
+                        className="w-full px-2 py-1 text-xs font-mono rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[11px] text-slate-600 dark:text-slate-400">
+                        Góc xoay ngang (az: {geo3dAz}°):
+                      </label>
+                      <input
+                        type="range"
+                        min="-80"
+                        max="80"
+                        value={geo3dAz}
+                        onChange={(e) => setGeo3dAz(Number(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-slate-600 dark:text-slate-400">
+                        Góc nhìn cao (el: {geo3dEl}°):
+                      </label>
+                      <input
+                        type="range"
+                        min="10"
+                        max="55"
+                        value={geo3dEl}
+                        onChange={(e) => setGeo3dEl(Number(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PRESET_GEO3D_SPECS.map((item) => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => {
+                          setGeo3dKind(item.kind);
+                          setGeo3dApex(item.apex);
+                          setGeo3dBase(item.base);
+                          setGeo3dFoot(item.foot);
+                          setGeo3dAz(item.az);
+                          setGeo3dEl(item.el);
+                        }}
+                        className="text-[11px] px-2 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-teal-50 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-slate-700 transition-colors cursor-pointer"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'geo2d' && (
+                <>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PRESET_GEO2D_JSON.map((item) => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => setGeo2dJson(JSON.stringify(item.spec, null, 2))}
+                        className="text-[11px] px-2 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-indigo-50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-slate-700 transition-colors cursor-pointer"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Cấu hình toạ độ Hình 2D / Vector (JSON):
+                    </label>
+                    <textarea
+                      rows={5}
+                      value={geo2dJson}
+                      onChange={(e) => setGeo2dJson(e.target.value)}
+                      className="w-full p-2.5 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white outline-none"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Nút thao tác chèn vào Câu hỏi / Copy / Tải PNG */}
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/70 dark:border-slate-700">
+                {(onUpdateExamContent || onUpdateSolutionContent) && (
+                  <div className="flex flex-wrap items-center gap-1.5 bg-white dark:bg-slate-800 px-2.5 py-1.5 rounded-xl border border-teal-200 dark:border-slate-700">
+                    <select
+                      value={targetDoc}
+                      onChange={(e) => setTargetDoc(e.target.value as 'exam' | 'solution')}
+                      className="text-xs font-semibold text-slate-700 dark:text-slate-200 bg-transparent outline-none cursor-pointer"
+                    >
+                      <option value="exam">Đề thi</option>
+                      <option value="solution">Lời giải</option>
+                    </select>
+                    <span className="text-slate-300">|</span>
+                    <select
+                      value={selectedQuestion}
+                      onChange={(e) => setSelectedQuestion(e.target.value)}
+                      className="text-xs font-bold text-teal-800 dark:text-teal-300 bg-transparent outline-none cursor-pointer"
+                    >
+                      {questionNumbers.map((num) => (
+                        <option key={num} value={num}>
+                          Câu {num}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={handleInsertIntoQuestion}
+                      disabled={!svgStr}
+                      className="text-xs font-bold px-2.5 py-1 rounded-lg bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors cursor-pointer"
+                    >
+                      📌 Dán vào Câu {selectedQuestion}
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleCopyImage}
+                  disabled={!svgStr}
+                  className="text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer"
+                >
+                  {copied ? '✓ Đã copy!' : '📋 Copy ảnh'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadPng}
+                  disabled={!svgStr}
+                  className="text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
+                >
+                  ⬇ Tải PNG (300 DPI)
+                </button>
+              </div>
+
+              {insertedMsg && (
+                <p className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 inline-block">
+                  ✅ {insertedMsg}
+                </p>
+              )}
+            </div>
+
+            {/* Cột phải: Xem trước ảnh 300 DPI */}
+            <div className="lg:col-span-7 flex flex-col items-center justify-center bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 min-h-[200px]">
+              {pngUrl ? (
+                <>
+                  <img
+                    src={pngUrl}
+                    alt="Xem trước hình minh hoạ 300 DPI"
+                    className="max-w-full h-auto bg-white rounded-lg"
+                    style={{ maxHeight: '250px' }}
+                  />
+                  <span className="text-[11px] text-slate-400 mt-2 text-center">
+                    Ảnh chuẩn 300 DPI — Hiển thị trực tiếp trên web và tự động nhúng vào file Word (.docx)
+                  </span>
+                </>
+              ) : (
+                <span className="text-xs text-rose-500 text-center px-4">
+                  Không nhận diện được biểu thức hoặc cấu hình JSON. Vui lòng kiểm tra lại cú pháp hàm số (ví dụ: x^3 - 3*x + 1).
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default BbtQuickGenerator;
